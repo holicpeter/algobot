@@ -1,1 +1,26 @@
+name: AlgoBot — RSI+MACD+BB Trading Bot
 
+on:
+  schedule:
+    - cron: '*/15 13-21 * * 1-5'  # Každých 15 min, Po-Pia, 13:00-21:00 UTC (US market)
+  workflow_dispatch:  # Manuálne spustenie
+
+jobs:
+  trade:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run trading bot
+        env:
+          ALPACA_API_KEY: ${{ secrets.ALPACA_API_KEY }}
+          ALPACA_SECRET_KEY: ${{ secrets.ALPACA_SECRET_KEY }}
+        run: timeout 840 python bot.py || true  # Max 14 minút, potom stop
